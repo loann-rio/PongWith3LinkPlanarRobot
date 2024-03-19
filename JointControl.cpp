@@ -19,9 +19,7 @@ void Robot::closeRobot()
 
 void Robot::moveByJoint(std::vector<float> jointVal)
 {
-
-
-	_oDxlHandler.sendTargetJointPosition(jointVal);
+	if (enableCom) _oDxlHandler.sendTargetJointPosition(jointVal);
 	//std::cout << "command sent\n";
 }
 
@@ -39,7 +37,7 @@ std::vector<float> Robot::cartesianMove(std::vector<float> worldPos, std::vector
 		vTargetJointPosition.push_back(qi[2]);
 		vTargetJointPosition.push_back(- qi[1] - qi[2]);
 
-		//_oDxlHandler.sendTargetJointPosition(vTargetJointPosition);
+		if (enableCom) _oDxlHandler.sendTargetJointPosition(vTargetJointPosition);
 
 		return vTargetJointPosition;
 	
@@ -50,5 +48,7 @@ std::vector<float> Robot::cartesianMove(std::vector<float> worldPos, std::vector
 
 bool Robot::changeSpeed(int speed)
 {
+	if (!enableCom) return false;
+	std::cout << "hello\n";
 	return _oDxlHandler.setSpeed(speed);
 }

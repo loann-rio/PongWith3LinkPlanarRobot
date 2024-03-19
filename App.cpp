@@ -9,7 +9,6 @@
 #include <string>
 #include <array>
 
-#define enableCom false
 
 void App::run()
 {

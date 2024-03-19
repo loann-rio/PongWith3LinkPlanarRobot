@@ -12,7 +12,8 @@
 
 class Robot {
 public:
-	
+	Robot(bool enableCom) : enableCom { enableCom } {}
+
 	void initRobot();
 	void closeRobot();
 
@@ -29,6 +30,7 @@ private:
 	const float _robotDxlProtocol = 2.0;
 	const int _robotDxlBaudRate = 1000000;
 
+	bool enableCom = false;
 
 };
 
