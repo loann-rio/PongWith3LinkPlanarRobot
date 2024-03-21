@@ -145,6 +145,7 @@
     <ClCompile Include="JointControl.cpp" />
     <ClCompile Include="Kinematics.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="SerialPort.cpp" />
     <ClCompile Include="SFMLWindow.cpp" />
     <ClCompile Include="Utils.h" />
   </ItemGroup>
@@ -154,6 +155,7 @@
     <ClInclude Include="ImageProcessor.h" />
     <ClInclude Include="JointControl.h" />
     <ClInclude Include="Kinematics.h" />
+    <ClInclude Include="SerialPort.h" />
     <ClInclude Include="SFMLWindow.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

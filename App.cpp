@@ -1,27 +1,15 @@
 #include "App.h"
 
-#include "Utils.h"
-
-// std library
-#include <algorithm>  
-#include <iostream>
-#include <vector>
-#include <string>
-#include <array>
-
 
 void App::run()
 {
-    if (enableCom)
-        planarRobot->initRobot();
+    if (enableComRobot) planarRobot->initRobot();
 
+    SFMLWindow window{ 800, 800, planarRobot,
+            enableComArduino, enableCamera, enableCalibration, 
+            autoPlay, cameraId, portRobot, portArduino};
 
-    SFMLWindow window{ 400, 600, planarRobot };
     window.loop();
 
-
-    if (enableCom)
-        planarRobot->closeRobot();
-
-
+    if (enableComRobot) planarRobot->closeRobot();
 }
