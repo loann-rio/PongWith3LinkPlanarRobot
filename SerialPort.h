@@ -3,11 +3,16 @@
 #define SERIALCLASS_H_INCLUDED
 
 #include <windows.h>
-#include <stdio.h>
+#include <iostream>
 #include <stdlib.h>
 #include <string.h>
-#include <iostream>
+#include <comdef.h>
+#include <stdio.h>
 #include <vector>
+
+#include <Wbemidl.h>
+
+#pragma comment(lib, "wbemuuid.lib")
 
 #define ARDUINO_WAIT_TIME 2000
 #define DEFAULT_READ_BUFFER_SIZE 255
@@ -51,6 +56,8 @@ public:
 	bool isConnected();
 
 	std::vector<std::string> getCommandFromSerial();
+
+	static void GetUSBConnections();
 
 	
 

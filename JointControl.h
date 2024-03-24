@@ -21,6 +21,9 @@ public:
 	std::vector<float> cartesianMove(std::vector<float> worldPos, std::vector<float> lengthLinks);
 
 	bool changeSpeed(int speed);
+	std::array<float, 8> getPosJoints();
+
+	void changeEEXposition(float change);
 
 private:
 
@@ -30,7 +33,12 @@ private:
 	const float _robotDxlProtocol = 2.0;
 	const int _robotDxlBaudRate = 1000000;
 
-	bool enableCom = false;
+	const bool enableCom = false;
+
+	std::vector<float> angleMotors{ 0.f, 90.0f, 0.f, 0.f };
+	const std::vector<float> lengthLinks{ 5.f, 7.75f, 3.f };
+	float XpositionEndEffector = 0;
+
 
 };
 

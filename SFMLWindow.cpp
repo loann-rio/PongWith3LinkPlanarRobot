@@ -13,8 +13,7 @@ SFMLWindow::SFMLWindow(int width, int height, std::shared_ptr<Robot> planarRobot
     width{width}, height{height}, planarRobot{ planarRobot }, comArduino { enableComArduino }, enableCamera { enableCamera }, cameraCalibration { cameraCalibration }, automaticPlay{ automaticPlay }, robotPort{ portRobot }, port{ portArduino }
 {
 	initShapes();
-    if (enableCamera)
-        imageProcessor.initCam(cameraId);
+    
 }
 
 void SFMLWindow::loop()
@@ -22,9 +21,6 @@ void SFMLWindow::loop()
     // user corner setting
     if (cameraCalibration)
         cornerSetting();
-
-    // create the window
-    sf::RenderWindow window(sf::VideoMode(width, height), "2 link planar robot pong");
     
     while (window.isOpen())
     {
@@ -134,6 +130,11 @@ void SFMLWindow::cornerSetting()
     }
 }
 
+sf::Vector2f SFMLWindow::getMousePos()
+{
+    return (sf::Vector2f{ sf::Mouse::getPosition(window) } - posBaseRobot) / (float)cm2Pix;
+}
+
 
 
 
@@ -209,22 +210,28 @@ void SFMLWindow::punch()
     planarRobot->changeSpeed(64);
 }
 
-void SFMLWindow::manageSFMLevent(sf::RenderWindow& window, sf::Event event)
+void SFMLWindow::manageSFMLevent(sf::RenderWindow& window)
 {
-    if (event.type == sf::Event::Closed || sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
-        window.close();
+    // manage sfml event
+    sf::Event event;
+    while (window.pollEvent(event)) {
+        if (event.type == sf::Event::Closed || sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+            window.close();
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-        updateXpos(keyStep);
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+            updateXpos(keyStep);
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+            updateXpos(-keyStep);
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+            punch();
+        }
     }
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-        updateXpos(-keyStep);
-    }
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-        punch();
-    }
+   
 }
 
 void SFMLWindow::render(sf::RenderWindow& window)
@@ -312,6 +319,7 @@ void SFMLWindow::render(sf::RenderWindow& window)
     window.draw(link2, 4, sf::Quads);
     window.draw(link3, 4, sf::Quads);
 
+
     window.draw(pingpongBall);
     window.display();
 
@@ -342,7 +350,9 @@ void SFMLWindow::manageArduinoMsgs()
         if (msg[0] != '-')
             msg = "0" + msg;
 
-        if (stoi(msg) != 0)
-            updateXpos((float)stoi(msg) / 70.0f);
+        float val = stoi(msg);
+        if (val != 0)
+            updateXpos(val / 70.0f);
     }
 }
+

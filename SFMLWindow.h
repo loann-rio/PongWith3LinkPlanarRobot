@@ -23,6 +23,7 @@ public:
 
 	void loop();
 	void cornerSetting();
+	sf::Vector2f getMousePos();
 
 private:
 
@@ -35,8 +36,11 @@ private:
 	// window //
 	const int width;
 	const int height;
-	void manageSFMLevent(sf::RenderWindow& window, sf::Event event);
+	// create the window
+	sf::RenderWindow window{ sf::VideoMode(width, height), "2 link planar robot pong" };
+	void manageSFMLevent(sf::RenderWindow& window);
 	void render(sf::RenderWindow& window);
+
 
 	// camera //
 	const bool cameraCalibration;

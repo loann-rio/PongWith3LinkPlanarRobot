@@ -47,3 +47,29 @@ bool Robot::changeSpeed(int speed)
 	if (!enableCom) return false;
 	return _oDxlHandler.setSpeed(speed);
 }
+
+std::array<float, 8> Robot::getPosJoints()
+{
+	// first link
+	float x1 = cos(angleMotors[0]) * lengthLinks[0];
+	float y1 = sin(angleMotors[0]) * lengthLinks[0];
+
+	// second link
+	float x2 = x1 + cos(angleMotors[0] + angleMotors[2]) * lengthLinks[1];
+	float y2 = y1 + sin(angleMotors[0] + angleMotors[2]) * lengthLinks[1];
+
+	// third link (ee)
+	float x3 = x2 + cos(angleMotors[0] + angleMotors[2] + angleMotors[3]) * lengthLinks[2];
+	float y3 = y2 + sin(angleMotors[0] + angleMotors[2] + angleMotors[3]) * lengthLinks[2];
+
+	return { 0, 0, x1, y1, x2, y2, x3, y3 };
+}
+
+void Robot::changeEEXposition(float change)
+{
+	XpositionEndEffector = std::min(std::max(-20.f, XpositionEndEffector + change), 20.f);
+	std::vector<float> r = this->cartesianMove({ 6.5f, XpositionEndEffector }, { 5.f, 7.75f, 3.f });
+
+	if (!r.empty())
+		angleMotors = r;
+}
