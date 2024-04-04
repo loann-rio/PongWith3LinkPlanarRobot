@@ -1,4 +1,5 @@
 #include "SerialPort.h"
+#include <string>
 
 Serial::Serial(const char* portName) : m_cReadBufferSize(DEFAULT_READ_BUFFER_SIZE)
 {
@@ -177,4 +178,164 @@ std::vector<std::string> Serial::getCommandFromSerial()
 	}
 
 	return msgs;
+}
+
+
+std::string Serial::GetUSBConnections()
+{
+	HRESULT hres;
+
+	// Initialize COM
+	hres = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+	if (FAILED(hres)) {
+		std::cerr << "Failed to initialize COM library. Error code = 0x" << std::hex << hres << std::endl;
+		return "";
+	}
+
+	// Initialize security
+	hres = CoInitializeSecurity(
+		nullptr,
+		-1,
+		nullptr,
+		nullptr,
+		RPC_C_AUTHN_LEVEL_DEFAULT,
+		RPC_C_IMP_LEVEL_IMPERSONATE,
+		nullptr,
+		EOAC_NONE,
+		nullptr
+	);
+
+	if (FAILED(hres)) {
+		std::cerr << "Failed to initialize security. Error code = 0x" << std::hex << hres << std::endl;
+		CoUninitialize();
+		return "";
+	}
+
+	// Obtain the initial locator to WMI
+	IWbemLocator* pLoc = nullptr;
+	hres = CoCreateInstance(
+		CLSID_WbemLocator,
+		nullptr,
+		CLSCTX_INPROC_SERVER,
+		IID_IWbemLocator,
+		reinterpret_cast<LPVOID*>(&pLoc)
+	);
+
+	if (FAILED(hres)) {
+		std::cerr << "Failed to create IWbemLocator object. Error code = 0x" << std::hex << hres << std::endl;
+		CoUninitialize();
+		return "";
+	}
+
+	// Connect to WMI through the IWbemLocator::ConnectServer method
+	IWbemServices* pSvc = nullptr;
+	hres = pLoc->ConnectServer(
+		_bstr_t(L"ROOT\\CIMV2"),
+		nullptr,
+		nullptr,
+		nullptr,
+		0,
+		nullptr,
+		nullptr,
+		&pSvc
+	);
+
+	if (FAILED(hres)) {
+		std::cerr << "Could not connect to WMI namespace. Error code = 0x" << std::hex << hres << std::endl;
+		pLoc->Release();
+		CoUninitialize();
+		return "";
+	}
+
+	// Set security levels on the proxy
+	hres = CoSetProxyBlanket(
+		pSvc,
+		RPC_C_AUTHN_WINNT,
+		RPC_C_AUTHZ_NONE,
+		nullptr,
+		RPC_C_AUTHN_LEVEL_CALL,
+		RPC_C_IMP_LEVEL_IMPERSONATE,
+		nullptr,
+		EOAC_NONE
+	);
+
+
+	if (FAILED(hres)) {
+		std::cerr << "Could not set proxy blanket. Error code = 0x" << std::hex << hres << std::endl;
+		pSvc->Release();
+		pLoc->Release();
+		CoUninitialize();
+		return "";
+	}
+
+
+	// Execute the query
+	IEnumWbemClassObject* pEnumerator = nullptr;
+	hres = pSvc->ExecQuery(
+		_bstr_t(L"WQL"),
+		_bstr_t(L"SELECT * FROM Win32_PnPEntity WHERE Caption LIKE '%(COM%)'"),
+		WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
+		nullptr,
+		&pEnumerator
+	);
+
+
+	if (FAILED(hres)) {
+		std::cerr << "Query for USB devices failed. Error code = 0x" << std::hex << hres << std::endl;
+		pSvc->Release();
+		pLoc->Release();
+		CoUninitialize();
+		return "";
+	}
+
+
+	// Iterate over the query results
+	IWbemClassObject* pclsObj = nullptr;
+	ULONG uReturn = 0;
+
+	std::string arduinoCom = "";
+
+	while (pEnumerator) {
+
+		hres = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
+		if (uReturn == 0) break;
+		
+		VARIANT vtProp;
+
+		// Get the Caption property
+		hres = pclsObj->Get(L"Caption", 0, &vtProp, 0, 0);
+
+		if (SUCCEEDED(hres)) {
+
+			std::wstring caption(vtProp.bstrVal); 
+			size_t comIndex = caption.find(L"(COM");
+
+			if (comIndex != std::wstring::npos) { 
+
+				std::wstring comSubstring = caption.substr(comIndex); 
+				size_t closeParenIndex = comSubstring.find(L")"); 
+
+				if (closeParenIndex != std::wstring::npos) { 
+					std::wstring comNumber = comSubstring.substr(4, closeParenIndex - 4);
+					std::wstring deviceName = caption.substr(0, comIndex); 
+					// Print the extracted COM number and device name
+					std::wcout << L"COM Number: " << comNumber << L", Device Name: " << deviceName << std::endl;
+
+					if (deviceName.find(L"Arduino") != std::wstring::npos)
+						arduinoCom = "COM" + static_cast<char>(comNumber[0]);
+				}
+			}
+			VariantClear(&vtProp);
+		}
+		pclsObj->Release();
+	}
+
+
+	// Cleanup
+	pSvc->Release();
+	pLoc->Release();
+	pEnumerator->Release();
+	CoUninitialize();
+
+	return arduinoCom;
 }

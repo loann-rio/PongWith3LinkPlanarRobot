@@ -30,7 +30,7 @@ private:
 	const float _robotDxlProtocol = 2.0;
 	const int _robotDxlBaudRate = 1000000;
 
-	bool enableCom = false;
+	const bool enableCom = false;
 
 };
 

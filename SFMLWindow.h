@@ -22,7 +22,7 @@ public:
 	~SFMLWindow() {}
 
 	void loop();
-	void cornerSetting();
+	std::vector<sf::Vector2f> cornerSetting();
 
 private:
 
@@ -42,12 +42,15 @@ private:
 	const bool cameraCalibration;
 	const bool enableCamera;
 
+	sf::Vector2f posBall(std::vector<float> distances);
+
 	cv::Mat frame;
 	const std::string windowName;
 	ImagePorcessor imageProcessor{ frame, windowName };
 
 	// planar robot //
 	const bool automaticPlay;
+	std::vector<sf::Vector2f> cornerPos;
 	const std::string robotPort;
 	std::shared_ptr<Robot> planarRobot = std::make_shared<Robot>();
 	void moveRobotUsingMouse(sf::RenderWindow& window);
@@ -66,7 +69,11 @@ private:
 	sf::CircleShape pingpongBall{ ballWidth };
 
 	// world variable
-	const sf::Vector2f posBaseRobot{ 200, 400 };
+	const sf::Vector2f posBaseRobot{ 100, 250 };
+
+	// terrain:
+	sf::RectangleShape rectangle{ sf::Vector2f(600.f, 300.f) }; 
+	
 
 	// planar robot variables
 	float XpositionEndEffector = 0;

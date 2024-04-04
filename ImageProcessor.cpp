@@ -245,7 +245,7 @@ cv::Point ImagePorcessor::getPosBall()
 	// Get the centroid of the largest contour
 	if (maxAreaIndex != -1) {
 		cv::Moments mu = moments(contours[maxAreaIndex]);
-		cv::Point centroid(mu.m10 / mu.m00, mu.m01 / mu.m00);
+		cv::Point centroid(mu.m10 / mu.m00 + .5f, mu.m01 / mu.m00 + .5f);
 
 		//std::cout << "Position of the most orange pixel: " << centroid << std::endl;
 
