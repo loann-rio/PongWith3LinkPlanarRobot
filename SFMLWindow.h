@@ -80,7 +80,7 @@ private:
 
 	std::array<float, 2> posEE{};
 	std::vector<float> angleMotors{ 0.f, 90.0f, 0.f, 0.f };
-	std::vector<float> lengthLinks{ 5.f, 7.75f, 3.f };
+	std::vector<float> lengthLinks{ 5.f, 8.25f, 3.f };
 
 
 

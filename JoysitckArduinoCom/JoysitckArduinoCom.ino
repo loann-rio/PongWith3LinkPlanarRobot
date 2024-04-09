@@ -15,12 +15,13 @@ int lastPunchVal = 0;
 
 
 void setup() {
+  
   Serial.begin(9600);
 
-  for (int i = 0; i < NUM_JOY; i++)
-  {
+  for (int i = 0; i < NUM_JOY; i++) {
     pinMode(joyPin[i], INPUT);
   }
+  
 }
 
 void loop() {
@@ -33,7 +34,6 @@ void loop() {
   
   if (joyVal[1] < -50 && lastPunchVal>-50){
     Serial.println('p');
-    
   }
 
   lastPunchVal = joyVal[1];

@@ -3,14 +3,14 @@
 #include "SFMLWindow.h"
 #include "JointControl.h"
 
-#define enableComRobot true
+#define enableComRobot false
 #define enableComArduino false
-#define enableCamera true
-#define enableCalibration true
+#define enableCamera false
+#define enableCalibration false
 #define autoPlay false
-#define cameraId 0
+#define cameraId 2
 #define portRobot "COM6"
-#define portArduino "COM2"
+#define portArduino "COM8"
 
 
 class App
@@ -20,23 +20,9 @@ public:
 
 private:
 
-
-
-	// camera //
-	/*cv::Mat frame;
-	const std::string windowName;
-	ImagePorcessor imageProcessor{ frame, windowName };*/
-
 	// planar robot //
 	const std::string robotPort;
-	std::shared_ptr<Robot> planarRobot = std::make_shared<Robot>(enableComRobot);
-	///void moveRobotUsingMouse(sf::RenderWindow& window);
-
-	// serial //
-	/*const std::string port;
-	Serial serialPort{ port.c_str() };
-	const bool comArduino;*/
-	//void manageArduinoMsgs();
+	std::shared_ptr<Robot> planarRobot = std::make_shared<Robot>(enableComRobot, portRobot);
 
 };
 

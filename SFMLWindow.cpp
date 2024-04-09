@@ -57,16 +57,33 @@ void SFMLWindow::loop()
             auto frameInfo = imageProcessor.getBallInfo();
             std::vector<float> distances{};
 
-            float distCorners = sqrt(pow(cornerPos[0].x - cornerPos[1].x, 2) + pow(cornerPos[0].y - cornerPos[1].y, 2));
+            /*float distCorners = sqrt(pow(cornerPos[0].x - cornerPos[1].x, 2) + pow(cornerPos[0].y - cornerPos[1].y, 2));
 
             for (const sf::Vector2f& corner : cornerPos) {
                 distances.push_back( 
                     sqrt(pow(corner.x - frameInfo.BallXPosition, 2) + pow(corner.y - frameInfo.BallYPosition, 2)) / distCorners
                 );
-            }
+            }*/
 
-            sf::Vector2f realPos = posBall(distances); 
-            std::cout << realPos.x << " " << realPos.y << "\n";  
+            float x1 = (cornerPos[0].x - frameInfo.BallXPosition*10.666f) / (cornerPos[0].x - cornerPos[1].x);
+            float x2 = (cornerPos[3].x - frameInfo.BallXPosition*10.666f) / (cornerPos[3].x - cornerPos[2].x);
+
+            float y1 = (cornerPos[0].y - frameInfo.BallYPosition*16) / (cornerPos[0].y - cornerPos[3].y);
+            float y2 = (cornerPos[1].y - frameInfo.BallYPosition*16) / (cornerPos[1].y - cornerPos[2].y);
+            sf::Vector2f realPos = { (x1 + x2) / 2, (y1 + y2) / 2};
+            pingpongBall.setPosition(rectangle.getPosition() + sf::Vector2f({realPos.x * 600, realPos.y * 300}));
+
+            std::cout << (1 - realPos.y) * 28 - 14.f << "\n";
+
+            std::vector<float> r = planarRobot->cartesianMove({ 6.f , (1 - realPos.y) * 25 - 12.5f }, { 5.f, 8.25f, 3.f });
+
+            if (!r.empty())
+                angleMotors = r;
+
+            if (realPos.x < 0.1f) {
+                //punch();
+            }
+          
         }
 
 
@@ -153,8 +170,9 @@ std::vector<sf::Vector2f> SFMLWindow::cornerSetting()
 void SFMLWindow::updateXpos(float change)
 {
     XpositionEndEffector = std::min(std::max(-20.f, XpositionEndEffector + change), 20.f);
+    //std::cout << XpositionEndEffector << "\n";
     //angleMotors = { std::min(pi<float> / 2.f, std::max(XpositionEndEffector, -pi<float> / 2.f)), pi<float> / 2.f, -1 * XpositionEndEffector / 2 , -1 * XpositionEndEffector / 2 };
-    std::vector<float> r = planarRobot->cartesianMove({ 6.5f, XpositionEndEffector }, { 5.f, 7.75f, 3.f });
+    std::vector<float> r = planarRobot->cartesianMove({ 6.5f, XpositionEndEffector }, { 5.f, 8.25f, 3.f });
 
     if (!r.empty())
         angleMotors = r;
@@ -204,7 +222,7 @@ void SFMLWindow::punch()
 
     planarRobot->changeSpeed(255);
 
-    std::vector<float> r = planarRobot->cartesianMove({ 6.5f + (float)((sin(acos(XpositionEndEffector / 12.f)) * 12.f - 6.5)*2/3), XpositionEndEffector }, { 5.f, 7.75f, 3.f });
+    std::vector<float> r = planarRobot->cartesianMove({ 6.5f + (float)((sin(acos(XpositionEndEffector / 12.f)) * 12.f - 6.5)*2/3), XpositionEndEffector }, { 5.f, 8.25f, 3.f });
 
     if (!r.empty())
         angleMotors = r;
@@ -214,7 +232,7 @@ void SFMLWindow::punch()
 
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-    r = planarRobot->cartesianMove({ 6.5f, XpositionEndEffector }, { 5.f, 7.75f, 3.f });
+    r = planarRobot->cartesianMove({ 6.5f, XpositionEndEffector }, { 5.f, 8.25f, 3.f });
 
     if (!r.empty())
         angleMotors = r;
@@ -336,31 +354,35 @@ void SFMLWindow::render(sf::RenderWindow& window)
 sf::Vector2f SFMLWindow::posBall(std::vector<float> distances)
 {
 
-    std::vector<sf::Vector2f> corners{
-        {0, 0}, {0, 1} , {1, 30}, {60, 0}
-    };
+    //std::vector<sf::Vector2f> corners{
+    //    {0, 0}, {0, 1} , {1, 30}, {60, 0}
+    //};
+    //
+    //// Check if there are enough fixed points and distances
+    //if (corners.size() < 3 || corners.size() != distances.size()) {
+    //    std::cerr << "Invalid input" << std::endl;
+    //    return { 0.0, 0.0 };
+    //}
+    //
+    //// Calculate coefficients for linear equations
+    //double a = 2 * (corners[1].x - corners[0].x);
+    //double b = 2 * (corners[1].y - corners[0].y);
+    //double c = pow(distances[0], 2) - pow(distances[1], 2) - pow(corners[0].x, 2) +
+    //    pow(corners[1].x, 2) - pow(corners[0].y, 2) + pow(corners[1].y, 2);
+    //double d = 2 * (corners[2].x - corners[1].x);
+    //double e = 2 * (corners[2].y - corners[1].y);
+    //double f = pow(distances[1], 2) - pow(distances[2], 2) - pow(corners[1].x, 2) +
+    //    pow(corners[2].x, 2) - pow(corners[1].y, 2) + pow(corners[2].y, 2);
+    //
+    //// Solve for x and y
+    //double x = (c * e - f * b) / (a * e - b * d);
+    //double y = (c * d - a * f) / (b * d - a * e);
+    //
+    //return sf::Vector2f(x, y);
 
-    // Check if there are enough fixed points and distances
-    if (corners.size() < 3 || corners.size() != distances.size()) {
-        std::cerr << "Invalid input" << std::endl;
-        return { 0.0, 0.0 };
-    }
 
-    // Calculate coefficients for linear equations
-    double a = 2 * (corners[1].x - corners[0].x);
-    double b = 2 * (corners[1].y - corners[0].y);
-    double c = pow(distances[0], 2) - pow(distances[1], 2) - pow(corners[0].x, 2) +
-        pow(corners[1].x, 2) - pow(corners[0].y, 2) + pow(corners[1].y, 2);
-    double d = 2 * (corners[2].x - corners[1].x);
-    double e = 2 * (corners[2].y - corners[1].y);
-    double f = pow(distances[1], 2) - pow(distances[2], 2) - pow(corners[1].x, 2) +
-        pow(corners[2].x, 2) - pow(corners[1].y, 2) + pow(corners[2].y, 2);
+    return {};
 
-    // Solve for x and y
-    double x = (c * e - f * b) / (a * e - b * d);
-    double y = (c * d - a * f) / (b * d - a * e);
-
-    return sf::Vector2f(x, y);
 
 }
 
@@ -370,7 +392,7 @@ void SFMLWindow::moveRobotUsingMouse(sf::RenderWindow& window)
     sf::Vector2f posMouseToRob = (sf::Vector2f{ sf::Mouse::getPosition(window) } - posBaseRobot) / (float)cm2Pix;
 
     // get joint angle to reach the mouse (take only 2 links in account)
-    std::vector<float> r = planarRobot->cartesianMove({ posMouseToRob.x-3.f, -posMouseToRob.y }, { 5.f, 7.75f, 3.f });
+    std::vector<float> r = planarRobot->cartesianMove({ posMouseToRob.x-3.f, -posMouseToRob.y }, { 5.f, 8.25f, 3.f });
 
     if (!r.empty())
         angleMotors = r;

@@ -12,7 +12,7 @@
 
 class Robot {
 public:
-	Robot(bool enableCom) : enableCom{ enableCom } {}
+	Robot(bool enableCom, std::string portName) : enableCom{ enableCom }, _robotDxlPortName{ portName } {}
 
 	void initRobot();
 	void closeRobot();

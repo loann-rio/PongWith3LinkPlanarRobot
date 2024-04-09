@@ -58,7 +58,5 @@ private:
 
 	std::chrono::time_point<std::chrono::system_clock> frameTime = std::chrono::system_clock::now();
 
-
-
 };
 
