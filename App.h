@@ -8,9 +8,9 @@
 #define enableCamera false
 #define enableCalibration false
 #define autoPlay false
-#define cameraId 2
+#define cameraId 0
 #define portRobot "COM6"
-#define portArduino "COM8"
+#define portArduino "COM7"
 
 
 class App

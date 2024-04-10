@@ -7,7 +7,7 @@
 
 //Parameters
 const int joyPin[2] = {A0, A1};
-const int joyOffset = 3; // from the calibration phase
+const int joyOffset = 7; // from the calibration phase
 
 int joyVal [NUM_JOY] = {0, 0};
 

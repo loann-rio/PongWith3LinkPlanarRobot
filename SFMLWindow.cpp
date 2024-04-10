@@ -73,15 +73,24 @@ void SFMLWindow::loop()
             sf::Vector2f realPos = { (x1 + x2) / 2, (y1 + y2) / 2};
             pingpongBall.setPosition(rectangle.getPosition() + sf::Vector2f({realPos.x * 600, realPos.y * 300}));
 
-            std::cout << (1 - realPos.y) * 28 - 14.f << "\n";
+            //std::cout << (1 - realPos.y) * 28 - 14.f << "\n";
 
-            std::vector<float> r = planarRobot->cartesianMove({ 6.f , (1 - realPos.y) * 25 - 12.5f }, { 5.f, 8.25f, 3.f });
+            std::vector<float> r = planarRobot->cartesianMove({ 9.f , (1 - realPos.y) * 25 - 12.5f }, { 5.f, 8.25f, 7.5f });
 
             if (!r.empty())
                 angleMotors = r;
+            else
+            {
+                std::vector<float> r = planarRobot->cartesianMove({ 6.f , (1 - realPos.y) * 25 - 12.5f }, { 5.f, 8.25f, 7.5f });
 
-            if (realPos.x < 0.1f) {
-                //punch();
+                if (!r.empty())
+                    angleMotors = r;
+            }
+
+            //std::cout << realPos.x << "\n";
+
+            if (realPos.x > 0.f && realPos.x < 0.1f ) {
+                punch(realPos.x);
             }
           
         }
@@ -172,7 +181,7 @@ void SFMLWindow::updateXpos(float change)
     XpositionEndEffector = std::min(std::max(-20.f, XpositionEndEffector + change), 20.f);
     //std::cout << XpositionEndEffector << "\n";
     //angleMotors = { std::min(pi<float> / 2.f, std::max(XpositionEndEffector, -pi<float> / 2.f)), pi<float> / 2.f, -1 * XpositionEndEffector / 2 , -1 * XpositionEndEffector / 2 };
-    std::vector<float> r = planarRobot->cartesianMove({ 6.5f, XpositionEndEffector }, { 5.f, 8.25f, 3.f });
+    std::vector<float> r = planarRobot->cartesianMove({ 9.f, XpositionEndEffector }, { 5.f, 8.25f, 7.5f });
 
     if (!r.empty())
         angleMotors = r;
@@ -217,12 +226,12 @@ std::array<float, 8> SFMLWindow::getPosEE()
     return { 0, 0, x1, y1, x2, y2, x3, y3 };
 }
 
-void SFMLWindow::punch()
+void SFMLWindow::punch(float Ypos)
 {
 
     planarRobot->changeSpeed(255);
 
-    std::vector<float> r = planarRobot->cartesianMove({ 6.5f + (float)((sin(acos(XpositionEndEffector / 12.f)) * 12.f - 6.5)*2/3), XpositionEndEffector }, { 5.f, 8.25f, 3.f });
+    std::vector<float> r = planarRobot->cartesianMove({ 11.f, 0.f }, { 5.f, 8.25f, 7.5f });
 
     if (!r.empty())
         angleMotors = r;
@@ -232,7 +241,7 @@ void SFMLWindow::punch()
 
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-    r = planarRobot->cartesianMove({ 6.5f, XpositionEndEffector }, { 5.f, 8.25f, 3.f });
+    r = planarRobot->cartesianMove({ 9.f, Ypos }, { 7.f, 8.25f, 7.5f });
 
     if (!r.empty())
         angleMotors = r;
@@ -256,7 +265,7 @@ void SFMLWindow::manageSFMLevent(sf::RenderWindow& window, sf::Event event)
     }
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-        punch();
+        punch(XpositionEndEffector);
     }
 }
 
@@ -392,7 +401,7 @@ void SFMLWindow::moveRobotUsingMouse(sf::RenderWindow& window)
     sf::Vector2f posMouseToRob = (sf::Vector2f{ sf::Mouse::getPosition(window) } - posBaseRobot) / (float)cm2Pix;
 
     // get joint angle to reach the mouse (take only 2 links in account)
-    std::vector<float> r = planarRobot->cartesianMove({ posMouseToRob.x-3.f, -posMouseToRob.y }, { 5.f, 8.25f, 3.f });
+    std::vector<float> r = planarRobot->cartesianMove({ posMouseToRob.x- 7.5f, -posMouseToRob.y }, { 5.f, 8.25f, 7.5f });
 
     if (!r.empty())
         angleMotors = r;
@@ -403,7 +412,7 @@ void SFMLWindow::manageArduinoMsgs()
     std::vector<std::string> msgs = serialPort.getCommandFromSerial();
     for (std::string& msg : msgs) {
         if (msg[0] == 'p') {
-            punch();
+            punch(XpositionEndEffector);
             continue;
         }
 

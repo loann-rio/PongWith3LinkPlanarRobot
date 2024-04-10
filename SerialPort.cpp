@@ -3,11 +3,13 @@
 
 Serial::Serial(const char* portName) : m_cReadBufferSize(DEFAULT_READ_BUFFER_SIZE)
 {
+
+	std::string newPortName = GetUSBConnections();
 	//We're not yet connected
 	this->connected = false;
 
 	// get size of the wchar_t 
-	int wchars_num = MultiByteToWideChar(CP_UTF8, 0, portName, -1, NULL, 0);
+	int wchars_num = MultiByteToWideChar(CP_UTF8, 0, newPortName.c_str(), -1, NULL, 0);
 	wchar_t* wstr = new wchar_t[wchars_num]; // create a buffer
 	MultiByteToWideChar(CP_UTF8, 0, portName, -1, wstr, wchars_num); // set the value from convertion
 
@@ -308,6 +310,7 @@ std::string Serial::GetUSBConnections()
 		if (SUCCEEDED(hres)) {
 
 			std::wstring caption(vtProp.bstrVal); 
+
 			size_t comIndex = caption.find(L"(COM");
 
 			if (comIndex != std::wstring::npos) { 
@@ -319,7 +322,7 @@ std::string Serial::GetUSBConnections()
 					std::wstring comNumber = comSubstring.substr(4, closeParenIndex - 4);
 					std::wstring deviceName = caption.substr(0, comIndex); 
 					// Print the extracted COM number and device name
-					std::wcout << L"COM Number: " << comNumber << L", Device Name: " << deviceName << std::endl;
+					// std::wcout << L"COM Number: " << comNumber << L", Device Name: " << deviceName << std::endl;
 
 					if (deviceName.find(L"Arduino") != std::wstring::npos)
 						arduinoCom = "COM" + static_cast<char>(comNumber[0]);
